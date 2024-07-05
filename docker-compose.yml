@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: Evan
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring_app_container
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_container:5432/mydb
+      SPRING_DATASOURCE_USERNAME: Evan
+      SPRING_DATASOURCE_PASSWORD: 123
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+
+volumes:
+  pgdata:
